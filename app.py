@@ -78,5 +78,52 @@ def logout():
     flash('您已成功登出。', 'success')
     return redirect(url_for('index'))
 
+@app.route('/facilities')
+def facility_list():
+    conn = database.get_db_connection()
+    facilities = conn.execute('SELECT * FROM facilities').fetchall()
+    conn.close()
+    return render_template('facilities/facility_list.html', facilities=facilities)
+
+@app.route('/facility/<int:id>')
+def facility_detail(id):
+    conn = database.get_db_connection()
+    facility = conn.execute('SELECT * FROM facilities WHERE id = ?', (id,)).fetchone()
+    
+    if not facility:
+        flash('找不到該設施', 'error')
+        conn.close()
+        return redirect(url_for('facility_list'))
+        
+    reviews = conn.execute('''
+        SELECT r.*, u.username 
+        FROM facility_reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.facility_id = ?
+        ORDER BY r.created_at DESC
+    ''', (id,)).fetchall()
+    
+    conn.close()
+    return render_template('facilities/facility_detail.html', facility=facility, reviews=reviews)
+
+@app.route('/facility/<int:id>/review', methods=['POST'])
+@login_required
+def add_facility_review(id):
+    rating = request.form.get('rating', type=int)
+    content = request.form.get('content')
+    
+    if not rating or rating < 1 or rating > 5:
+        flash('請給予有效的星等評分 (1-5)', 'error')
+        return redirect(url_for('facility_detail', id=id))
+        
+    conn = database.get_db_connection()
+    conn.execute('INSERT INTO facility_reviews (facility_id, user_id, rating, content) VALUES (?, ?, ?, ?)',
+                 (id, session['user_id'], rating, content))
+    conn.commit()
+    conn.close()
+    
+    flash('評價發布成功！', 'success')
+    return redirect(url_for('facility_detail', id=id))
+
 if __name__ == '__main__':
     app.run(debug=True)

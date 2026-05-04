@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ facility.name }} - 設施評價{% endblock %}
+
+{% block content %}
+<div class="page-header" style="text-align: left; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+    <span class="badge badge-primary">{{ facility.category }}</span>
+    <h2 style="margin: 0.5rem 0; color: var(--primary-color);">{{ facility.name }}</h2>
+    <p style="color: var(--text-secondary);">{{ facility.description }}</p>
+</div>
+
+<div class="reviews-section">
+    <h3>新增評價</h3>
+    {% if session.get('user_id') %}
+    <form action="{{ url_for('add_facility_review', id=facility.id) }}" method="POST" class="review-form">
+        <div class="form-group">
+            <label>星等評分 (1-5)</label>
+            <div class="star-rating">
+                <input type="number" name="rating" min="1" max="5" required class="form-control" style="width: 100px;">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>評價內容</label>
+            <textarea name="content" rows="4" class="form-control" placeholder="請分享您的使用心得..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary">發布評價</button>
+    </form>
+    {% else %}
+    <div class="alert-box">
+        請先 <a href="{{ url_for('login') }}" style="color: var(--primary-color); text-decoration: underline;">登入</a> 後才能發表評價哦！
+    </div>
+    {% endif %}
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0;">
+
+    <h3>歷史評價 ({{ reviews|length }})</h3>
+    <div class="reviews-list">
+        {% for review in reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <strong>{{ review.username }}</strong>
+                <span class="review-rating">⭐️ {{ review.rating }}/5</span>
+                <span class="review-date">{{ review.created_at }}</span>
+            </div>
+            <div class="review-content">
+                {{ review.content }}
+            </div>
+        </div>
+        {% else %}
+        <p style="color: var(--text-secondary);">目前還沒有人對此設施留下評價，成為第一個評價的人吧！</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -260,3 +260,68 @@ footer {
     margin-top: 1.5rem;
     color: var(--text-secondary);
 }
+
+/* Facility Badge */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+/* Review System */
+.review-form {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.review-card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
+}
+
+.review-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateX(5px);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.review-rating {
+    color: #fbbf24;
+    font-weight: bold;
+}
+
+.review-date {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.alert-box {
+    background-color: rgba(245, 158, 11, 0.1);
+    border: 1px solid #f59e0b;
+    color: #f59e0b;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
