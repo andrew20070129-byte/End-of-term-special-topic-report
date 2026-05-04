@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}登入 - 校園論壇與設施評價系統{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>會員登入</h2>
+    <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group">
+            <label for="username">使用者名稱</label>
+            <input type="text" id="username" name="username" class="form-control" required placeholder="請輸入帳號">
+        </div>
+        <div class="form-group">
+            <label for="password">密碼</label>
+            <input type="password" id="password" name="password" class="form-control" required placeholder="請輸入密碼">
+        </div>
+        <button type="submit" class="btn-primary btn-block">登入系統</button>
+    </form>
+    <div class="auth-redirect">
+        還沒有帳號嗎？ <a href="{{ url_for('register') }}">立即註冊</a>
+    </div>
+</div>
+{% endblock %}
