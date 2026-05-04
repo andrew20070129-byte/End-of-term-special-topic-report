@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}發布新文章 - 校園論壇{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 800px;">
+    <h2>撰寫新文章</h2>
+    <form action="{{ url_for('new_post') }}" method="POST">
+        <div class="form-group">
+            <label for="board_id">選擇看板</label>
+            <select name="board_id" id="board_id" class="form-control" required>
+                <option value="" disabled selected>請選擇發文看板...</option>
+                {% for board in boards %}
+                <option value="{{ board.id }}" {% if request.args.get('board_id') == board.id|string %}selected{% endif %}>{{ board.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="title">文章標題</label>
+            <input type="text" name="title" id="title" class="form-control" required placeholder="請輸入吸睛的標題...">
+        </div>
+        <div class="form-group">
+            <label for="tags">標籤 (可選)</label>
+            <input type="text" name="tags" id="tags" class="form-control" placeholder="例如：#期中考, #通識課 (以逗號分隔)">
+        </div>
+        <div class="form-group">
+            <label for="content">文章內文</label>
+            <textarea name="content" id="content" rows="10" class="form-control" required placeholder="分享您的想法吧..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary btn-block">發布文章</button>
+    </form>
+</div>
+{% endblock %}

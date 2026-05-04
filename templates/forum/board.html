@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ board.name }} - 看板文章列表{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h2># {{ board.name }}</h2>
+    <p style="color: var(--text-secondary);">在這裡與大家交流關於「{{ board.name }}」的各種話題吧！</p>
+    {% if session.get('user_id') %}
+    <a href="{{ url_for('new_post') }}?board_id={{ board.id }}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">發布新文章</a>
+    {% endif %}
+</div>
+
+<div class="posts-list">
+    {% for post in posts %}
+    <div class="post-card" style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s;">
+        <div>
+            <h4 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">
+                <a href="{{ url_for('post_detail', id=post.id) }}" style="color: var(--text-primary);">{{ post.title }}</a>
+            </h4>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                發布者: {{ post.username }} • {{ post.created_at }}
+            </div>
+        </div>
+        <div style="text-align: right; color: var(--text-secondary);">
+            <span style="font-size: 1.2rem;">💬 {{ post.comment_count }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert-box">
+        這個看板目前空空如也，快來發布第一篇文章吧！
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

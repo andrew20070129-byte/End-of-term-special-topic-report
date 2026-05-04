@@ -15,7 +15,7 @@
         <ul class="nav-links">
             <li><a href="{{ url_for('index') }}">首頁</a></li>
             <li><a href="{{ url_for('facility_list') }}">設施評價</a></li>
-            <li><a href="#">校園論壇</a></li>
+            <li><a href="{{ url_for('forum') }}">校園論壇</a></li>
         </ul>
         <div class="auth-links">
             {% if session.get('user_id') %}

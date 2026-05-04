@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - 校園論壇{% endblock %}
+
+{% block content %}
+<div class="post-detail-container" style="background: var(--card-bg); padding: 2.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+    <div class="post-header" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <span class="badge badge-primary" style="margin-bottom: 1rem;">{{ post.board_name }}</span>
+        <h1 style="margin: 0.5rem 0; color: var(--primary-color);">{{ post.title }}</h1>
+        <div style="color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
+            <span>發布者: <strong>{{ post.username }}</strong></span>
+            <span>{{ post.created_at }}</span>
+        </div>
+        {% if post.tags %}
+        <div style="margin-top: 1rem; font-size: 0.875rem; color: #a78bfa;">
+            🏷️ {{ post.tags }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="post-content" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">{{ post.content }}</div>
+</div>
+
+<div class="comments-section">
+    <h3>留言討論 ({{ comments|length }})</h3>
+    
+    <div class="comments-list" style="margin-bottom: 3rem;">
+        {% for comment in comments %}
+        <div class="comment-card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color); margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+                <strong>B{{ loop.index }} • {{ comment.username }}</strong>
+                <span>{{ comment.created_at }}</span>
+            </div>
+            <div style="white-space: pre-wrap;">{{ comment.content }}</div>
+        </div>
+        {% else %}
+        <p style="color: var(--text-secondary);">還沒有人留言，搶個頭香吧！</p>
+        {% endfor %}
+    </div>
+
+    {% if session.get('user_id') %}
+    <div class="leave-comment-box" style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+        <h4>新增留言</h4>
+        <form action="{{ url_for('add_comment', id=post.id) }}" method="POST">
+            <div class="form-group">
+                <textarea name="content" rows="4" class="form-control" required placeholder="想說些什麼..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary">發布留言</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert-box">
+        請先 <a href="{{ url_for('login') }}" style="color: var(--primary-color); text-decoration: underline;">登入</a> 後才能參與討論。
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

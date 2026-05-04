@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}校園論壇 - 討論首頁{% endblock %}
+
+{% block content %}
+<div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>校園論壇</h2>
+    <form action="{{ url_for('search') }}" method="GET" style="display: flex; gap: 0.5rem;">
+        <input type="text" name="q" placeholder="搜尋文章..." class="form-control" style="width: 250px;">
+        <button type="submit" class="btn-primary">搜尋</button>
+    </form>
+</div>
+
+<div class="forum-layout" style="display: grid; grid-template-columns: 1fr 3fr; gap: 2rem;">
+    <aside class="sidebar">
+        <div class="card" style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h3 style="margin-top: 0; color: var(--primary-color);">看板列表</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for board in boards %}
+                <li style="margin-bottom: 0.8rem;">
+                    <a href="{{ url_for('board_detail', id=board.id) }}" style="display: block; padding: 0.5rem; border-radius: 6px; transition: background 0.3s;">
+                        # {{ board.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if session.get('user_id') %}
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <a href="{{ url_for('new_post') }}" class="btn-primary btn-block">發布新文章</a>
+        </div>
+        {% endif %}
+    </aside>
+
+    <main class="recent-posts">
+        <h3 style="margin-top: 0;">最新動態</h3>
+        <div class="posts-list">
+            {% for post in recent_posts %}
+            <div class="post-card" style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 1rem; transition: transform 0.2s;">
+                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    <span class="badge badge-primary">{{ post.board_name }}</span> 
+                    • 發布者: {{ post.username }} • {{ post.created_at }}
+                </div>
+                <h4 style="margin: 0.5rem 0;">
+                    <a href="{{ url_for('post_detail', id=post.id) }}" style="color: var(--text-primary);">{{ post.title }}</a>
+                </h4>
+            </div>
+            {% else %}
+            <p>目前還沒有任何文章喔！</p>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

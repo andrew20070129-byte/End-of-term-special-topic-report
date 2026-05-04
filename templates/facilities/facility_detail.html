@@ -45,10 +45,49 @@
             <div class="review-content">
                 {{ review.content }}
             </div>
+            <div class="review-actions" style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
+                <button onclick="voteReview({{ review.id }}, 'like')" class="btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.9rem;">
+                    👍 <span id="like-count-{{ review.id }}">{{ review.likes }}</span>
+                </button>
+                <button onclick="voteReview({{ review.id }}, 'dislike')" class="btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.9rem;">
+                    👎 <span id="dislike-count-{{ review.id }}">{{ review.dislikes }}</span>
+                </button>
+                
+                {% if session.get('user_id') == review.user_id %}
+                <form action="{{ url_for('delete_review', id=review.id) }}" method="POST" style="margin-left: auto;">
+                    <button type="submit" class="btn-outline" style="color: var(--danger); border-color: var(--danger); padding: 0.2rem 0.5rem; font-size: 0.9rem;" onclick="return confirm('確定要刪除這則評價嗎？')">刪除</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
         {% else %}
         <p style="color: var(--text-secondary);">目前還沒有人對此設施留下評價，成為第一個評價的人吧！</p>
         {% endfor %}
     </div>
 </div>
+
+<script>
+function voteReview(reviewId, voteType) {
+    fetch(`/review/${reviewId}/vote`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vote_type: voteType })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
+            document.getElementById(`dislike-count-${reviewId}`).innerText = data.dislikes;
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('發生錯誤，請稍後再試');
+    });
+}
+</script>
 {% endblock %}
