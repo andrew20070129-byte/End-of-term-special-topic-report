@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}校園論壇與設施評價系統{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('index') }}">校園入口網</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">首頁</a></li>
+            <li><a href="#">設施評價</a></li>
+            <li><a href="#">校園論壇</a></li>
+        </ul>
+        <div class="auth-links">
+            {% if session.get('user_id') %}
+                <span>歡迎, {{ session.get('username') }}</span>
+                <a href="#" class="btn-outline">登出</a>
+            {% else %}
+                <a href="#" class="btn-outline">登入</a>
+                <a href="#" class="btn-primary">註冊</a>
+            {% endif %}
+        </div>
+    </nav>
+    <main class="container">
+        <!-- 顯示 Flash 訊息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 校園論壇與設施評價系統. All rights reserved.</p>
+    </footer>
+</body>
+</html>
