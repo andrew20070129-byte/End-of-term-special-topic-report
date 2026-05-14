@@ -81,6 +81,17 @@ CREATE TABLE post_comments (
     FOREIGN KEY(parent_id) REFERENCES post_comments(id) ON DELETE CASCADE
 );
 
+-- 8. 留言按讚表
+CREATE TABLE comment_likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    comment_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(comment_id) REFERENCES post_comments(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(comment_id, user_id)
+);
+
 -- 預設插入一些假資料方便測試
 INSERT INTO boards (name) VALUES ('二手交易版'), ('選課討論版'), ('失物招領版'), ('心情版');
 INSERT INTO facilities (name, category, description) VALUES 

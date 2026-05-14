@@ -31,7 +31,17 @@
                 <strong>B{{ loop.index }} • {{ comment.username }}</strong>
                 <span>{{ comment.created_at }}</span>
             </div>
-            <div style="white-space: pre-wrap;">{{ comment.content }}</div>
+            <div style="white-space: pre-wrap; margin-bottom: 1rem;">{{ comment.content }}</div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn-like" data-id="{{ comment.id }}" style="background: none; border: 1px solid var(--border-color); color: {{ 'var(--primary-color)' if comment.user_liked else 'var(--text-secondary)' }}; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; transition: 0.2s;">
+                    👍 <span class="like-count">{{ comment.like_count }}</span>
+                </button>
+                {% if session.get('user_id') == comment.user_id %}
+                <form action="{{ url_for('delete_comment', id=comment.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('確定要刪除這則留言嗎？');">
+                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.875rem;">🗑️ 刪除</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
         {% else %}
         <p style="color: var(--text-secondary);">還沒有人留言，搶個頭香吧！</p>
@@ -54,4 +64,39 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+document.querySelectorAll('.btn-like').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.id;
+        const countSpan = this.querySelector('.like-count');
+        
+        fetch(`/comment/${commentId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if (res.redirected) {
+                window.location.href = res.url;
+                return null;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.status === 'success') {
+                countSpan.textContent = data.like_count;
+                if (data.action === 'liked') {
+                    this.style.color = 'var(--primary-color)';
+                } else {
+                    this.style.color = 'var(--text-secondary)';
+                }
+            } else if (data && data.message) {
+                alert(data.message);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

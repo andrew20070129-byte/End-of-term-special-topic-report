@@ -272,13 +272,16 @@ def post_detail(id):
         conn.close()
         return redirect(url_for('forum'))
         
+    user_id = session.get('user_id', 0)
     comments = conn.execute('''
-        SELECT c.*, u.username 
+        SELECT c.*, u.username,
+               (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) as like_count,
+               EXISTS(SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = ?) as user_liked
         FROM post_comments c
         JOIN users u ON c.user_id = u.id
         WHERE c.post_id = ?
         ORDER BY c.created_at ASC
-    ''', (id,)).fetchall()
+    ''', (user_id, id)).fetchall()
     
     conn.close()
     return render_template('forum/post.html', post=post, comments=comments)
@@ -299,6 +302,55 @@ def add_comment(id):
     
     flash('留言發布成功', 'success')
     return redirect(url_for('post_detail', id=id))
+
+@app.route('/comment/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_comment(id):
+    conn = database.get_db_connection()
+    comment = conn.execute('SELECT * FROM post_comments WHERE id = ?', (id,)).fetchone()
+    
+    if not comment:
+        flash('留言不存在', 'error')
+        conn.close()
+        return redirect(url_for('forum'))
+        
+    if comment['user_id'] != session['user_id']:
+        flash('您無權刪除他人的留言', 'error')
+        conn.close()
+        return redirect(url_for('post_detail', id=comment['post_id']))
+        
+    post_id = comment['post_id']
+    conn.execute('DELETE FROM post_comments WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    
+    flash('留言已成功刪除', 'success')
+    return redirect(url_for('post_detail', id=post_id))
+
+@app.route('/comment/<int:id>/like', methods=['POST'])
+@login_required
+def like_comment(id):
+    conn = database.get_db_connection()
+    user_id = session['user_id']
+    
+    existing = conn.execute('SELECT id FROM comment_likes WHERE comment_id = ? AND user_id = ?', (id, user_id)).fetchone()
+    
+    if existing:
+        # 收回按讚
+        conn.execute('DELETE FROM comment_likes WHERE comment_id = ? AND user_id = ?', (id, user_id))
+        action = 'unliked'
+    else:
+        # 新增按讚
+        conn.execute('INSERT INTO comment_likes (comment_id, user_id) VALUES (?, ?)', (id, user_id))
+        action = 'liked'
+        
+    conn.commit()
+    
+    # 取得最新按讚數
+    like_count = conn.execute('SELECT COUNT(*) FROM comment_likes WHERE comment_id = ?', (id,)).fetchone()[0]
+    conn.close()
+    
+    return jsonify({'status': 'success', 'action': action, 'like_count': like_count})
 
 @app.route('/search')
 def search():
