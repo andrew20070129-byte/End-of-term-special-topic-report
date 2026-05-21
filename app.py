@@ -83,7 +83,35 @@ def facility_list():
     conn = database.get_db_connection()
     facilities = conn.execute('SELECT * FROM facilities').fetchall()
     conn.close()
-    return render_template('facilities/facility_list.html', facilities=facilities)
+    
+    # 建立分群結構：大樓 -> 樓層 -> 設施列表
+    grouped = {}
+    for f in facilities:
+        building = f['building']
+        floor = f['floor']
+        if building not in grouped:
+            grouped[building] = {}
+        if floor not in grouped[building]:
+            grouped[building][floor] = []
+        grouped[building][floor].append(f)
+    
+    # 對樓層進行排序的輔助函數 (例如：B2, B1, 1樓, 2樓...)
+    def sort_floors(floor_str):
+        try:
+            if floor_str.upper().startswith('B'):
+                return -int(floor_str[1:].replace('樓', '').strip())
+            else:
+                return int(floor_str.replace('樓', '').replace('F', '').replace('f', '').strip())
+        except ValueError:
+            return 999
+            
+    # 將每個大樓底下的樓層依照順序排列
+    sorted_grouped = {}
+    for building, floors in grouped.items():
+        sorted_floors_list = sorted(floors.items(), key=lambda x: sort_floors(x[0]))
+        sorted_grouped[building] = sorted_floors_list
+        
+    return render_template('facilities/facility_list.html', grouped_facilities=sorted_grouped)
 
 @app.route('/facility/<int:id>')
 def facility_detail(id):
@@ -191,7 +219,14 @@ def vote_review(id):
 @app.route('/forum')
 def forum():
     conn = database.get_db_connection()
-    boards = conn.execute('SELECT * FROM boards').fetchall()
+    # 抓取看板列表，並計算每個看板下的文章數，排序以文章數降冪、看板ID升冪排序
+    boards = conn.execute('''
+        SELECT b.*, COUNT(p.id) as post_count
+        FROM boards b
+        LEFT JOIN posts p ON b.id = p.board_id
+        GROUP BY b.id
+        ORDER BY post_count DESC, b.id ASC
+    ''').fetchall()
     
     # 抓取最新 5 篇文章
     recent_posts = conn.execute('''
@@ -205,6 +240,37 @@ def forum():
     conn.close()
     
     return render_template('forum/forum.html', boards=boards, recent_posts=recent_posts)
+
+@app.route('/board/create', methods=['POST'])
+@login_required
+def create_board():
+    board_name = request.form.get('board_name')
+    if not board_name:
+        flash('看板名稱不能為空！', 'error')
+        return redirect(url_for('forum'))
+        
+    board_name = board_name.strip()
+    if len(board_name) < 2 or len(board_name) > 20:
+        flash('看板名稱長度必須在 2 到 20 個字元之間！', 'error')
+        return redirect(url_for('forum'))
+        
+    conn = database.get_db_connection()
+    existing = conn.execute('SELECT id FROM boards WHERE name = ?', (board_name,)).fetchone()
+    if existing:
+        flash('此看板已經存在了！', 'error')
+        conn.close()
+        return redirect(url_for('forum'))
+        
+    try:
+        conn.execute('INSERT INTO boards (name) VALUES (?)', (board_name,))
+        conn.commit()
+        flash(f'看板「{board_name}」建立成功！', 'success')
+    except Exception as e:
+        flash('建立看板時發生錯誤，請稍後再試。', 'error')
+    finally:
+        conn.close()
+        
+    return redirect(url_for('forum'))
 
 @app.route('/board/<int:id>')
 def board_detail(id):

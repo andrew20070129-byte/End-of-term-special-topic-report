@@ -18,6 +18,8 @@ CREATE TABLE users (
 -- 2. 設施表
 CREATE TABLE facilities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    building TEXT NOT NULL,
+    floor TEXT NOT NULL,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     description TEXT
@@ -94,8 +96,3 @@ CREATE TABLE comment_likes (
 
 -- 預設插入一些假資料方便測試
 INSERT INTO boards (name) VALUES ('二手交易版'), ('選課討論版'), ('失物招領版'), ('心情版');
-INSERT INTO facilities (name, category, description) VALUES 
-('總圖書館B1自習區', '讀書空間', '提供安靜的自習環境與充足插座'),
-('綜合教學大樓3樓男廁', '廁所', '靠近電梯旁'),
-('綜合教學大樓3樓女廁', '廁所', '靠近電梯旁'),
-('學生活動中心1樓大垃圾桶', '垃圾桶', '資源回收與一般垃圾集中區');

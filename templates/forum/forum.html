@@ -18,16 +18,28 @@
             <ul style="list-style: none; padding: 0; margin: 0;">
                 {% for board in boards %}
                 <li style="margin-bottom: 0.8rem;">
-                    <a href="{{ url_for('board_detail', id=board.id) }}" style="display: block; padding: 0.5rem; border-radius: 6px; transition: background 0.3s;">
-                        # {{ board.name }}
+                    <a href="{{ url_for('board_detail', id=board.id) }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; border-radius: 6px; background: rgba(255, 255, 255, 0.02); border: 1px solid transparent; transition: all 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'; this.style.borderColor='rgba(59, 130, 246, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.02)'; this.style.borderColor='transparent'">
+                        <span># {{ board.name }}</span>
+                        <span class="badge badge-primary" style="font-size: 0.75rem; padding: 0.15rem 0.4rem; background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4);">{{ board.post_count }} 篇</span>
                     </a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
         {% if session.get('user_id') %}
+        <div class="card" style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 1.5rem;">
+            <h4 style="margin-top: 0; color: var(--primary-color);">建立新看板</h4>
+            <form action="{{ url_for('create_board') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <input type="text" name="board_name" placeholder="輸入新看板名稱..." required class="form-control" style="width: 100%;" minlength="2" maxlength="20">
+                <button type="submit" class="btn-outline btn-block" style="padding: 0.4rem; font-size: 0.9rem;">新增看板</button>
+            </form>
+        </div>
         <div style="margin-top: 1.5rem; text-align: center;">
             <a href="{{ url_for('new_post') }}" class="btn-primary btn-block">發布新文章</a>
+        </div>
+        {% else %}
+        <div class="alert-box" style="margin-top: 1.5rem; padding: 1rem; font-size: 0.9rem;">
+            登入後即可建立新看板與發布文章。
         </div>
         {% endif %}
     </aside>
